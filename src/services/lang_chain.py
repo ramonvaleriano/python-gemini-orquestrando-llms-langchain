@@ -8,31 +8,25 @@ from src.helpers.my_helper import encode_image
 
 ChatGoogleGenerativeAI.model_rebuild()
 
-def run():
-    llm = ChatGoogleGenerativeAI(
-        api_key=GEMINI_API_KEY,
-        model=MODEL_1_3_FLASH
-    )
+print(f"Model: {MODEL_1_3_FLASH}, Chave: {GEMINI_API_KEY}")
 
-    path_image = "src/data/exemplo_grafico.jpg"
+class LangChainService:
+    def __init__(self):
+        self.__model = MODEL_1_3_FLASH
+        self.__gemini_apy_key = GEMINI_API_KEY
+        self.llm = ChatGoogleGenerativeAI(
+            api_key=self.__gemini_apy_key, model=self.__model
+        )
 
-    image = encode_image(path_image)
+    def run(self, path_image=None, question=None):
+        image = encode_image(path_image)
+        message = HumanMessage(
+            content=[
+                {"type": "text", "text": question},
+                {"type": "image_url", "image_url": f"data:image/jpeg;base64,{image}"},
+            ]
+        )
 
-    question = "Descreva a imagem: "
+        response = self.llm.invoke([message])
 
-    message = HumanMessage(
-        content=[
-            {
-                "type": "text",
-                "text": question
-            },
-            {
-                "type": "image_url",
-                "image_url": f"data:image/jpeg;base64,{image}"
-            }
-        ]
-    )
-
-    response = llm.invoke([message])
-
-    print(response.content)
+        return response
